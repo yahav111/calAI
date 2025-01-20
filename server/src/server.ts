@@ -1,11 +1,17 @@
 require("dotenv").config();
-import { PrismaClient } from "@prisma/client";
 import express, { Express } from "express";
-// import { categoriesRouter } from "./routes/categoriesRoutes";
+import cors from "cors";
 import { aiRouter } from "./routes/aiRoutes";
 const app: Express = express();
 const port: Number = Number(process.env.PORT) || 3100;
 
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"], // Allow specific HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
+  })
+);
 app.use(express.json());
 
 // app.use("/categories", categoriesRouter);
