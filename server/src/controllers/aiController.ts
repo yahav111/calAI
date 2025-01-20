@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { client } from "../configs/configOpenAi";
-import OpenAI from "openai";
 import fs from "fs";
 
 function encodeImage(imagePath: any) {
@@ -9,35 +8,72 @@ function encodeImage(imagePath: any) {
 }
 
 export const getAiTest = async (req: Request, res: Response): Promise<void> => {
-  const imagePath = "C:/projects/calAI/server/apple.jpg";
+  const imagePath =
+    "C:/Users/yotam/OneDrive/Documents/Git-Files/calAI/server/rice.jpg";
   const base64Image = encodeImage(imagePath);
-  const imagePath2 = "C:/projects/calAI/server/apple2.jpg";
-  const base64Image2 = encodeImage(imagePath2);
-  //   const params: OpenAI.Chat.ChatCompletionCreateParams = {
-  //     messages: [{ role: "user", content: "what is the capital of israel" }],
-  //     model: "gpt-4o",
-  //   };
 
-  const promtText = `
-  I need you to estimate the number of calories in the food shown in the image. 
-  Please keep the following instructions in mind:
-  
-  1. Identify the food items in the image. What type of food is it (e.g., vegetables, fruits, grains, meat, etc.)? If there are multiple items, describe each one.
-  2. Estimate the portion size based on the image. Try to calculate the approximate serving size of each food item.
-  3. For each food item identified, provide an approximate calorie count based on typical serving sizes. Please be as specific as possible. If the dish includes ingredients like hummus, falafel, or shawarma, consider how these foods are typically prepared in Israel.
-  4. Since I am from Israel, please account for local cuisine, traditional recipes, and common portion sizes when making your estimate.
-  
-  Please provide the most accurate estimate you can based on the visual content, typical nutritional information, and your knowledge of food.
-  `;
+  const newTextPrompt = `Please analyze the food items visible in the provided image. The user is from Israel, so consider common foods from the region when identifying the items. Follow these steps:
+
+1. **Identify the food items**: Clearly list each distinct food item visible in the image.  
+2. **Estimate portion size**: Based on the image, estimate the weight of each food item in grams. Use common serving sizes and visual cues for accuracy.  
+3. **Calculate nutritional values**: Provide approximate calorie counts and macronutrient breakdown (carbohydrates, proteins, fats) for each food item based on the estimated portion size.  
+4. **Provide a total summary**: Include a total for the calories and macronutrients if multiple items are present.
+
+Ensure your response is detailed, clear, and formatted for easy understanding.
+i want you to return me a json object with the following structure:
+  {
+    "calories": number,
+    "foodItems": [
+      {
+        "name": string,
+        "calories": number,
+        "weight": number (in grams),
+        "weightText": string (100 grams )
+      },
+      {
+        "name": string,
+        "calories": number,
+        "weight": number (in grams),
+        "weightText": string (100 grams )
+      }
+    ]
+  }
+    and make it a parse able json with a js format with no additional text.
+`;
+
+  const changeText = `i have this object {'calories':130,'foodItems':[{'name':'White Rice','calories':130,'weight':100,'weightText':'100 grams'}]}} and i want to change from 100grams to 300 grams give me the updated values with the same format 
+            i want you to return me a json object with the following structure:
+  {
+    "calories": number,
+    "foodItems": [
+      {
+        "name": string,
+        "calories": number,
+        "weight": number (in grams),
+        "protein": number,
+        "weightText": string (100 grams )
+      },
+      {
+        "name": string,
+        "calories": number,
+        "weight": number (in grams),
+        "protein": number,
+        "weightText": string (100 grams )
+      }
+    ]
+  }
+    and make it a parse able json with a js format with no additional text.
+            
+            `;
   const response = await client.chat.completions.create({
-    model: "gpt-4o",
+    model: "chatgpt-4o-latest",
     messages: [
       {
         role: "user",
         content: [
           {
             type: "text",
-            text: promtText,
+            text: newTextPrompt,
           },
 
           {
@@ -50,7 +86,12 @@ export const getAiTest = async (req: Request, res: Response): Promise<void> => {
       },
     ],
   });
-  //   const chatCompletion: OpenAI.Chat.ChatCompletion =
-  //     await client.chat.completions.create(params);
-  res.status(200).json({ message: response.choices[0].message.content });
+  //@ts-ignore
+  const jsonString = response.choices[0].message.content.replace(
+    /```json\n|\n```/g,
+    ""
+  );
+
+  const parsedJson = JSON.parse(jsonString);
+  res.status(200).json({ message: parsedJson });
 };
