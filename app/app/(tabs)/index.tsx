@@ -1,14 +1,11 @@
-import { Image, StyleSheet, Platform } from "react-native";
 import { TextInput, type TextInputProps } from "react-native";
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { View } from "react-native";
 import { Card } from "~/components/ui/card";
-import { Search, AArrowDown } from "lucide-react-native";
+import { Search } from "@/lib/icons/SearchIcon";
+import { ScanBarcode } from "@/lib/icons/BarcodeIcon";
+
 import CameraModal from "~/components/search/CameraModal";
 export default function HomeScreen() {
   return (
@@ -19,11 +16,14 @@ export default function HomeScreen() {
       <Card className="absolute bottom-0 w-screen right-0 rounded-none bg-[#1e1e1e] border-none outline-none px-2 py-3">
         <View className="relative h-14">
           <TextInput
-            className="bg-[#333333] rounded-[40px] text-right pr-10 pl-4 placeholder:text-white text-white h-full"
+            className="bg-[#333333] rounded-[40px] text-right pr-11 pl-4 placeholder:text-white text-white h-full"
             placeholder="חיפוש מהיר"
           />
-          <View className="absolute right-3 h-full flex justify-center">
-            <Search size={24} className="text-white" />
+          <View className="absolute right-4 h-full flex justify-center">
+            <Search size={18} className="text-white" />
+          </View>
+          <View className="absolute left-4 h-full flex justify-center">
+            <ScanBarcode size={24} className="text-white" />
           </View>
         </View>
       </Card>

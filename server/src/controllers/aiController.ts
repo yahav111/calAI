@@ -1,11 +1,28 @@
 import { Request, Response } from "express";
 import { client } from "../configs/configOpenAi";
 import fs from "fs";
+import { removeImage, supabase } from "../configs/supabase";
 
 function encodeImage(imagePath: any) {
   const imageBuffer = fs.readFileSync(imagePath);
   return imageBuffer.toString("base64");
 }
+
+const encodeImageFromSupabase = async (
+  bucket: string,
+  path: string
+): Promise<string> => {
+  const { data, error } = await supabase.storage.from(bucket).download(path);
+
+  if (error || !data) {
+    throw new Error(
+      `Failed to download image from Supabase: ${error?.message}`
+    );
+  }
+
+  const buffer = Buffer.from(await data.arrayBuffer());
+  return buffer.toString("base64");
+};
 
 export const getAiTest = async (req: Request, res: Response): Promise<void> => {
   const imagePath =
@@ -94,4 +111,60 @@ i want you to return me a json object with the following structure:
 
   const parsedJson = JSON.parse(jsonString);
   res.status(200).json({ message: parsedJson });
+};
+
+export const PostAiTest = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const base64Image = await encodeImageFromSupabase("Images", "test.jpg");
+  const newTextPrompt = `Please analyze the food items visible in the provided image. The user is from Israel, so consider common foods from the region when identifying the items. Follow these steps:
+
+  1. **Identify the food items**: Clearly list each distinct food item visible in the image.  
+  2. **Estimate portion size**: Based on the image, estimate the weight of each food item in grams. Use common serving sizes and visual cues for accuracy.  
+  3. **Calculate nutritional values**: Provide approximate calorie counts and macronutrient breakdown (carbohydrates, proteins, fats) for each food item based on the estimated portion size.  
+  4. **Provide a total summary**: Include a total for the calories and macronutrients if multiple items are present.
+  
+  Ensure your response is detailed, clear, and formatted for easy understanding.
+  I want you to return me a JSON object with the following structure:
+    {
+      "calories": number,
+      "foodItems": [
+        {
+          "name": string,
+          "calories": number,
+          "weight": number (in grams),
+          "weightText": string (100 grams )
+        }
+      ]
+    }
+  Make it a parsable JSON with a proper format, with no additional text.`;
+  const response = await client.chat.completions.create({
+    model: "chatgpt-4o-latest",
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: newTextPrompt },
+
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${base64Image}`,
+            },
+          },
+        ],
+      },
+    ],
+  });
+  //@ts-ignore
+  const jsonString = response.choices[0].message.content.replace(
+    /```json\n|\n```/g,
+    ""
+  );
+  console.log(jsonString);
+
+  const parsedJson = JSON.parse(jsonString);
+  removeImage("test.jpg");
+  res.status(200).json({ data: parsedJson });
 };
