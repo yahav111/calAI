@@ -55,7 +55,8 @@ export const CustomCamera: React.FC<CustomCameraProps> = ({
         });
         const json = await response.json();
         //@ts-ignore
-        onPictureTaken?.(json.data.foodItems[0].name);
+        Alert.alert("Food Details", JSON.stringify(json.data, null, 2));
+        // onPictureTaken?.(json.data.foodItems[0].name);
       } catch (error) {
         console.error("Error uploading photo:", error);
       }
