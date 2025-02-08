@@ -1,31 +1,26 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
-import {
-  LayoutDashboard,
-  Apple,
-  Plus,
-  DotSquare,
-  Search,
-} from "lucide-react-native";
+import { Platform, TouchableOpacity, Text, View } from "react-native";
+import { LayoutDashboard, Apple, DotSquare, Search } from "lucide-react-native";
 import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import { Plus } from "@/lib/icons/PlusIcon";
 import TabBarBackground from "@/components/ui/TabBarBackground";
+import CustomHeader from "~/components/CustomHeader";
 
 export default function TabLayout() {
   const colorScheme = "#1e1e1e";
-
+  const router = useRouter();
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: "white",
         headerShown: false,
+
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
             backgroundColor: colorScheme,
-            position: "absolute",
           },
           default: {
             backgroundColor: colorScheme,
@@ -51,10 +46,33 @@ export default function TabLayout() {
       <Tabs.Screen
         name="add-food"
         options={{
-          title: "More",
-          tabBarIcon: ({ color }) => (
-            <Plus color={color} size={32} /> // Makes the icon larger
+          tabBarLabel: () => null,
+          tabBarIcon: () => null,
+          tabBarButton: () => (
+            <TouchableOpacity
+              onPress={() => router.push("/add-food")}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  borderRadius: 50,
+                  padding: 5,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "white",
+                }}
+              >
+                <Plus size={20} className="text-black" />
+              </View>
+            </TouchableOpacity>
           ),
+          headerShown: true,
+          header: () => <CustomHeader />,
         }}
       />
       <Tabs.Screen

@@ -117,6 +117,8 @@ export const PostAiTest = async (
   req: Request,
   res: Response
 ): Promise<void> => {
+  console.log("got Request");
+
   const base64Image = await encodeImageFromSupabase("Images", "test.jpg");
   const newTextPrompt = `Please analyze the food items visible in the provided image. The user is from Israel, so consider common foods from the region when identifying the items. Follow these steps:
 

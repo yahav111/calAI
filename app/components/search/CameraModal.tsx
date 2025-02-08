@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Button, Modal, Alert } from "react-native";
-import { CustomCamera } from "@/components/Camera";
+import { CustomCamera } from "~/components/Camera/Camera";
 
 export default function CameraModal() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -14,7 +14,7 @@ export default function CameraModal() {
   };
 
   const handlePictureTaken = (photoUri: string) => {
-    setIsCameraOpen(false); // Close the camera after taking a picture
+    setIsCameraOpen(false);
     Alert.alert("Picture Taken", `Photo saved at: ${photoUri}`);
   };
 
